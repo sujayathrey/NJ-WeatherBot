@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from time import sleep
 from apscheduler.schedulers.blocking import BlockingScheduler
 
+### VIEW THE RESULTS OF THIS CODE ON MY TWITTER ACCOUNT: https://twitter.com/SujayAthrey ### 
+
 load_dotenv()
 base_url = "http://api.openweathermap.org/data/2.5/weather?"
 #city = "Hamilton"
