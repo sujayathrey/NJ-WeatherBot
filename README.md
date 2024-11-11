@@ -1,8 +1,30 @@
-# WeatherBot
+NJ Weather Bot 🌦️
+NJ Weather Bot is an automated Twitter bot that provides daily weather updates, summaries, and analysis for 52 cities in New Jersey. By utilizing the OpenWeatherMap API to fetch current weather conditions, the bot gathers and processes weather data to generate insightful tweets and visualizations. This project is designed to showcase skills in data querying through API integration, data parsing and handling with python, and data visualization/analysis. All these elements are combined into one tweet that is automated at the click of a button.
 
-A twitter bot which has the function of displaying a detailed weather report of a random city in NJ at that given day factoring in the current time as well.
-The bot is capable of sending out tweets that include present-day statistics like the sunrise and sunset, temperature, conditions, wind speed, and humidity.
-Sourced factual, real-time statistics about the current weather and conditions at different New Jersey cities using the Weather API provided by OpenWeather
-Used the Twitter API v2 along with the OAuth 2.0 authorization in order to get permission to post tweets under my bot account. Then accessed, parsed, and retrieved necessary information my bot needed from the JSON formatted data received from my Weather API requests.
+Project Overview
+The bot performs three primary functions:
+  1. Daily Weather Tweet: A friendly tweet providing key weather stats (temperature, wind speed, humidity, sunrise, sunset) for a random 
+     NJ city.
+  2. Data Collection: Collects and stores weather data for all 52 NJ cities into a CSV file for further analysis.
+  3. Weather Analysis Summary: Analyzes the data across NJ cities, generates summary statistics, and tweets out an analysis report along 
+     with multiple visualizations.
 
-**ALL TWITTER AND OPENWEATHER API KEYS/ACCESSTOKENS STORED IN A HIDDEN .ENV FILE TO BE ACCESSED PRIVATELY IN WEATHER_BOT.PY**
+     
+Features:
+  * Weather Updates for NJ Cities: Gathers real-time data on temperature, humidity, wind speed, and conditions for 52 cities in New Jersey.
+  * Random City Daily Report: Sends a weather update for a random NJ city with details on current temperature, feels-like temperature, 
+  humidity, wind speed, and weather description.
+  * Comprehensive Analysis Report: Calculates and tweets summary statistics across all cities (average temperature, highest and lowest 
+    temperatures, humidity, and common weather conditions).
+
+Visual Insights: 
+Each tweet will generates and tweets four graphs:
+  1. Top 30 hottest cities bar chart.
+  2. Temperature vs. humidity scatter plot.
+  3. Temperature trend across cities line plot.
+  4. Weather condition distribution pie chart.
+
+API Usage: 
+The bot utilizes two primary APIs:
+  1. OpenWeatherMap API: Retrieves weather data for each NJ city.
+  2. Twitter API (v1 and v2): Posts tweets with the gathered data, including text summaries and images of graphs.
