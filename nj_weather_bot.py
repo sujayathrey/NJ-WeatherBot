@@ -130,9 +130,10 @@ def collect_weather_data():
 
 #function to perform an analysis and tweet summary with a graph of high temperatures
 def analysis():
+    #load the collected weather data
     df = pd.read_csv('weather_data.csv')
 
-    #get statistics
+    #calculate summary statistics for the tweet message
     avg_temp = df['temp'].mean()
     max_temp = df['temp'].max()
     min_temp = df['temp'].min()
@@ -140,67 +141,86 @@ def analysis():
     avg_humidity = df['humidity'].mean()
     avg_wind_speed = df['wind_speed'].mean()
     most_common_desc = df['description'].mode()[0]
-    total_records = df.shape[0]  # Total records for percentage calculation
+    total_records = df.shape[0]
 
     today = datetime.date.today()
     formatted_date = today.strftime("%m/%d/%Y")
     
-    #create our message string
+    #construct the tweet message
     tweet_message = (
-        f"Daily Weather Analysis for NJ Cities({formatted_date}):\n"
+        f"Daily Weather Analysis for NJ Cities ({formatted_date}):\n"
         f"Average Temperature: {round(avg_temp)}°F\n"
         f"Max Temperature: {round(max_temp)}°F\n"
         f"Min Temperature: {round(min_temp)}°F\n"
-        f"Temperature Range: {temp_range:.2f}°F\n"  #need to format with 2 decimal places for some reason
+        f"Temperature Range: {temp_range:.2f}°F\n"
         f"Average Humidity: {round(avg_humidity)}%\n"
         f"Average Wind Speed: {round(avg_wind_speed, 2)} m/s\n"
         f"Most Common Weather Condition: {most_common_desc}\n"
         f"Total Cities Analyzed: {total_records}"
     )
 
-    #get only the top 30 hottest cities for our graph
-    top_cities = df.nlargest(30, 'temp')
-
-    #create a bar graph of high temperatures for the top 30 cities
+    #create and save the 4 plots
+    image_paths = []
+    
+    #Bar Plot for Top 30 Hottest Cities
     plt.figure(figsize=(14, 8))
-    colors = ['red'] * 8 + ['lightcoral'] * 8 + ['orange'] * 8 + ['yellow'] * 6 #use different colors for the temperatures
+    top_cities = df.nlargest(30, 'temp')
+    colors = ['red'] * 8 + ['lightcoral'] * 8 + ['orange'] * 8 + ['yellow'] * 6
     plt.bar(top_cities['city'], top_cities['temp'], color=colors)
-    #x,y and title labels
-    plt.xlabel('City')
-    plt.ylabel('High Temperature (°F)') 
-    plt.title('30 Hottest NJ Cities Today')
-
-    #adjust x-ticks to show all cities with smaller font size and angle
     plt.xticks(rotation=45, ha='right', fontsize=8)
-
-    #set x-ticks to ensure all cities are displayed
-    plt.gca().set_xticks(range(len(top_cities)))
-    plt.gca().set_xticklabels(top_cities['city'], rotation=45, ha='right', fontsize=8)
-
-    #adjust y-ticks to go by 5's
-    plt.yticks(range(0, int(max(top_cities['temp'])) + 5, 5))
-
-    #set y-ticks to be more frequent
-    plt.gca().yaxis.set_major_locator(plt.MaxNLocator(integer=True, prune='both'))
-
-    plt.tight_layout()  #use tight layout
-
-    #save the plot as an png image
+    plt.xlabel('City')
+    plt.ylabel('High Temperature (°F)')
+    plt.title('30 Hottest NJ Cities Today')
     image_path = 'hottest_nj_cities.png'
     plt.savefig(image_path)
     plt.close()
+    image_paths.append(image_path)
 
-    #check that tweet message is within Twitter's character limit
-    if len(tweet_message) <= 280:
-        # Upload image and tweet
-        media_id = api.media_upload(filename=image_path).media_id_string
-        client.create_tweet(text=tweet_message, media_ids=[media_id])
-        logging.info("Analysis + image tweeted succesfully ")
+    #Scatter Plot of Temperature vs. Humidity
+    plt.figure(figsize=(8, 6))
+    plt.scatter(df['temp'], df['humidity'], c=df['humidity'], cmap='coolwarm', edgecolor='black', s=100)
+    plt.colorbar(label='Humidity')  # Add color bar for the humidity
+    plt.xlabel('Temperature (°F)')
+    plt.ylabel('Humidity (%)')
+    plt.title('Temperature vs Humidity Across NJ Cities')
+    image_path = 'temp_vs_humidity.png'
+    plt.savefig(image_path)
+    plt.close()
+    image_paths.append(image_path)
+    
+    #Line Plot of Temperature by City
+    plt.figure(figsize=(10, 6))
+    df_sorted = df.sort_values('city')
+    plt.plot(df_sorted['city'], df_sorted['temp'], color="blue", marker="o")
+    plt.xticks(rotation=45, ha='right', fontsize=8)
+    plt.xlabel('City')
+    plt.ylabel('Temperature (°F)')
+    plt.title('Temperature Trend Across NJ Cities')
+    image_path = 'temperature_trend.png'
+    plt.savefig(image_path)
+    plt.close()
+    image_paths.append(image_path)
+    
+    #Pie Chart for Most Common Weather Condition
+    plt.figure(figsize=(8, 8))
+    desc_counts = df['description'].value_counts()
+    plt.pie(desc_counts, labels=desc_counts.index, autopct='%1.1f%%', colors=plt.cm.Paired.colors)
+    plt.title('Proportion of Weather Conditions Across NJ Cities')
+    image_path = 'weather_condition_pie_chart.png'
+    plt.savefig(image_path)
+    plt.close()
+    image_paths.append(image_path)
+
+    #check that tweet message is within character limit
+    if len(tweet_message) <= TWEET_CHARACTER_LIMIT:
+        #upload images and tweet
+        media_ids = [api.media_upload(filename=img_path).media_id_string for img_path in image_paths]
+        client.create_tweet(text=tweet_message, media_ids=media_ids)
+        logging.info("Analysis and images tweeted successfully")
     else:
-        logging.warning("Cannot tweet as it exceeds limit!")
-
+        logging.warning("Cannot tweet as it exceeds character limit!")
 
 # uncomment 1 for friendly report, uncomment 2&3 for anaylsis report 
 #(1) daily_weather_tweet()  
-#(2)collect_weather_data()  
-#(3) analysis()
+collect_weather_data()  
+analysis()
